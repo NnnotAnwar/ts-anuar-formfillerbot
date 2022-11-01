@@ -115,4 +115,8 @@ bot.on("message", async (ctx) => {
 })
 
 //Start the Bot
-bot.start();
+try {
+   bot.start();
+} catch (e) {
+   console.log('Bot not started:', e)
+}
