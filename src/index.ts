@@ -1,12 +1,15 @@
 import { Bot, InlineKeyboard } from "grammy";
-import { Builder, By } from "selenium-webdriver";
+import { Builder, Button, By, until, WebDriver } from "selenium-webdriver";
 import "chromedriver";
+import { Options } from "selenium-webdriver/chrome";
+import { elementIsEnabled, elementIsVisible } from "selenium-webdriver/lib/until";
 
 //Create a new bot
 const bot = new Bot("5739968241:AAET5XcN1c4lTsGdD9mJ3mOxwLV6J_kl-dU");
 
-//ChromeDriver emulator
+//ChromeDriver emulator, Chrome options
 const chrome = require('selenium-webdriver/chrome');
+const chromeOptions = new Options().addArguments('--lang=ru')
 
 //Pre-assign menu text
 const firstMenu = "<b>Menu 1</b>\n\nA beautiful menu with a shiny inline button.";
@@ -17,9 +20,9 @@ const nextButton = "Next";
 const backButton = "Back";
 const tutorialButton = "Tutorial";
 
-//My Data:
+//Data to send:
 const myName = "Anuar Kairulla";
-const myContact = "+420 705 974 542"
+const myContact = "Telegram: @anwar_kk"
 
 //Build keyboards
 const firstMenuMarkup = new InlineKeyboard().text(nextButton, backButton);
@@ -36,91 +39,79 @@ function detectURL(text: string) {
    return text.match(urlRegExp)
 }
 
-//This handler sends a menu with the inline buttons we pre-assigned above
-// bot.command("menu", async (ctx) => {
-//    await ctx.reply(firstMenu, {
-//       parse_mode: "HTML",
-//       reply_markup: firstMenuMarkup,
-//    });
-// });
-
-//This handler sends react on message
-// bot.on("message", (ctx) => {
-//    if (ctx.message.text && (googleFormLinkExample.test(ctx.message.text) || googleFormLinkShortExample.test(ctx.message.text))) {
-//       ctx.reply('This is Google Form Link')
-//    }
-// });
-
+// This handler catch a message that has a link and if it is google form link, fill it and send.
+// developed specially for GoStudy event 2022 group personally for me (Telegram: @anwar_kk)
 bot.on("message", async (ctx) => {
    if (ctx.message.text) {
       const links = detectURL(ctx.message.text)
       if (links) {
          for (const link of links) {
-            const driver = await new Builder().forBrowser('chrome').build()
+            const driver = await new Builder().forBrowser('chrome').setChromeOptions(chromeOptions).build()
             try {
                await driver.get(link)
                const title = await driver.getTitle()
                const textareas = await driver.findElements(By.className('KHxj8b tL9Q4c'))
                const inputs = await driver.findElements(By.className('whsOnd zHQkBf'))
                const buttons = await driver.findElements(By.className('NPEfkd RveJvd snByac'))
+               let buttonSend
+               let buttonNextFirst
                for (const button of buttons) {
-                  let buttonText = await button.getText()
-                  ctx.reply(buttonText)
+                  const buttonText = await button.getText()
+                  if (buttonText == 'Далее') {
+                     buttonNextFirst = button
+                  }
+                  if (buttonText == 'Отправить') {
+                     buttonSend = button
+                  }
+               }
+               if (textareas.length == 2 && buttonSend) {
+                  await textareas[0].sendKeys(myName)
+                  await textareas[1].sendKeys(myContact)
+                  await buttonSend.click()
+               }
+
+               if (textareas.length == 0 && buttonNextFirst) {
+                  await buttonNextFirst.click()
+                  await driver.wait(until.elementsLocated(By.className('KHxj8b tL9Q4c')), 3000)
+                  const textarea = await driver.findElement(By.className('KHxj8b tL9Q4c'))
+                  await driver.wait(until.elementIsEnabled(textarea), 3000)
+                  await textarea.sendKeys(myName)
+                  const buttons = await driver.findElements(By.className('NPEfkd RveJvd snByac'))
+                  for (const button of buttons) {
+                     await driver.wait(until.elementIsEnabled(button), 3000)
+                     const buttonText = await button.getText()
+                     if (buttonText == 'Далее') {
+                        await button.click()
+                        await driver.wait(until.elementsLocated(By.className('KHxj8b tL9Q4c')), 3000)
+                        const textarea = await driver.findElement(By.className('KHxj8b tL9Q4c'))
+                        await driver.wait(until.elementIsEnabled(textarea), 3000)
+                        await textarea.sendKeys(myContact)
+                        const buttons = await driver.findElements(By.className('NPEfkd RveJvd snByac'))
+                        for (const button of buttons) {
+                           await driver.wait(until.elementIsEnabled(button), 3000)
+                           const buttonText = await button.getText()
+                           if (buttonText == 'Отправить') {
+                              await button.click()
+                           }
+                        }
+                     }
+                  }
                }
             }
             catch (error) {
-               console.log('Error driver:', error)
+               console.log('Error catched:', error)
             }
             finally {
                await driver.quit()
             }
 
          }
-         console.log(
-            `${ctx.from.first_name} wrote ${"text" in ctx.message ? ctx.message.text : ""
-            }`,
-         );
       }
+      console.log(`${ctx.from.username} send message.`)
+      console.log(`Message: ${"text" in ctx.message ? ctx.message.text : ""}`)
+      console.log(new Date())
    }
 })
-
-//This handler processes back button on the menu
-// bot.callbackQuery(backButton, async (ctx) => {
-//    //Update message content with corresponding menu section
-//    await ctx.editMessageText(firstMenu, {
-//       reply_markup: firstMenuMarkup,
-//       parse_mode: "HTML",
-//    });
-// });
-
-//This handler processes next button on the menu
-// bot.callbackQuery(nextButton, async (ctx) => {
-//    //Update message content with corresponding menu section
-//    await ctx.editMessageText(secondMenu, {
-//       reply_markup: secondMenuMarkup,
-//       parse_mode: "HTML",
-//    });
-// });
-
-
-//This function would be added to the dispatcher as a handler for messages coming from the Bot API
-// bot.on("message", async (ctx) => {
-//    //Print to console
-//    console.log(
-//       `${ctx.from.first_name} wrote ${"text" in ctx.message ? ctx.message.text : ""
-//       }`,
-//    );
-
-//    if (ctx.message.text) {
-//       //Scream the message
-//       await ctx.reply(ctx.message.text.toUpperCase(), {
-//          entities: ctx.message.entities,
-//       });
-//    } else {
-//       //This is equivalent to forwarding, without the sender's name
-//       await ctx.copyMessage(ctx.message.chat.id);
-//    }
-// });
 
 //Start the Bot
 bot.start();
