@@ -5,7 +5,7 @@ import { Options } from "selenium-webdriver/chrome";
 import { elementIsEnabled, elementIsVisible } from "selenium-webdriver/lib/until";
 
 //Create a new bot
-const bot = new Bot("<TOKEN>");
+const bot = new Bot("<5540006836:AAFSRxFFkkidqjxQdosk7VVmo2tPq85016s>");
 
 //ChromeDriver emulator, Chrome options
 const chrome = require('selenium-webdriver/chrome');
