@@ -5,7 +5,7 @@ const selenium_webdriver_1 = require("selenium-webdriver");
 require("chromedriver");
 const chrome_1 = require("selenium-webdriver/chrome");
 //Create a new bot
-const bot = new grammy_1.Bot("5540006836:AAFSRxFFkkidqjxQdosk7VVmo2tPq85016s");
+const bot = new grammy_1.Bot("5540006836:AAHWVOln6dC6p9TMSDey2qI00MBLHAHHg34");
 //ChromeDriver emulator, Chrome options
 const chrome = require('selenium-webdriver/chrome');
 const chromeOptions = new chrome_1.Options().addArguments('--lang=ru');
