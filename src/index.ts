@@ -5,7 +5,7 @@ import { Options } from "selenium-webdriver/chrome";
 import { elementIsEnabled, elementIsVisible } from "selenium-webdriver/lib/until";
 
 //Create a new bot
-const bot = new Bot("5739968241:AAET5XcN1c4lTsGdD9mJ3mOxwLV6J_kl-dU");
+const bot = new Bot("<TOKEN>");
 
 //ChromeDriver emulator, Chrome options
 const chrome = require('selenium-webdriver/chrome');
@@ -103,6 +103,7 @@ bot.on("message", async (ctx) => {
             }
             finally {
                await driver.quit()
+               ctx.forwardMessage('806380705')
             }
 
          }
