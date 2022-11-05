@@ -1,5 +1,5 @@
 import { Bot, InlineKeyboard } from "grammy";
-import { Builder, Button, By, until, WebDriver } from "selenium-webdriver";
+import { Builder, Button, By, until, WebDriver, WebElement } from "selenium-webdriver";
 import "chromedriver";
 import { Options } from "selenium-webdriver/chrome";
 import { elementIsEnabled, elementIsVisible } from "selenium-webdriver/lib/until";
@@ -39,6 +39,32 @@ function detectURL(text: string) {
    return text.match(urlRegExp)
 }
 
+async function sendKey(driver: WebDriver, key: WebElement | null, className: string) {
+   if (key) {
+      // await driver.wait(until.elementLocated(By.className(className)))
+      // await driver.wait(until.elementIsEnabled(key), 1500)
+      await key.sendKeys(myName)
+      const buttons = await driver.findElements(By.className('NPEfkd RveJvd snByac'))
+      for (const button of buttons) {
+         const buttonText = await button.getText()
+         if (buttonText == 'Далее') {
+            await button.click()
+         }
+      }
+      const newKey = await driver.findElement(By.className(className))
+      await driver.wait(until.elementIsEnabled(newKey), 1500)
+      await newKey.sendKeys(myContact)
+      for (const button of buttons) {
+         const buttonText = await button.getText()
+         if (buttonText == 'Отправить') {
+            //await button.click()
+         }
+      }
+   } else {
+      return 0;
+   }
+}
+
 // This handler catch a message that has a link and if it is google form link, fill it and send.
 // developed specially for GoStudy event 2022 group personally for me (Telegram: @anwar_kk)
 bot.on("message", async (ctx) => {
@@ -70,32 +96,9 @@ bot.on("message", async (ctx) => {
                   await buttonSend.click()
                }
 
-               if (textareas.length == 0 && buttonNextFirst) {
+               if (buttonNextFirst) {
                   await buttonNextFirst.click()
-                  await driver.wait(until.elementsLocated(By.className('KHxj8b tL9Q4c')), 3000)
-                  const textarea = await driver.findElement(By.className('KHxj8b tL9Q4c'))
-                  await driver.wait(until.elementIsEnabled(textarea), 3000)
-                  await textarea.sendKeys(myName)
-                  const buttons = await driver.findElements(By.className('NPEfkd RveJvd snByac'))
-                  for (const button of buttons) {
-                     await driver.wait(until.elementIsEnabled(button), 3000)
-                     const buttonText = await button.getText()
-                     if (buttonText == 'Далее') {
-                        await button.click()
-                        await driver.wait(until.elementsLocated(By.className('KHxj8b tL9Q4c')), 3000)
-                        const textarea = await driver.findElement(By.className('KHxj8b tL9Q4c'))
-                        await driver.wait(until.elementIsEnabled(textarea), 3000)
-                        await textarea.sendKeys(myContact)
-                        const buttons = await driver.findElements(By.className('NPEfkd RveJvd snByac'))
-                        for (const button of buttons) {
-                           await driver.wait(until.elementIsEnabled(button), 3000)
-                           const buttonText = await button.getText()
-                           if (buttonText == 'Отправить') {
-                              await button.click()
-                           }
-                        }
-                     }
-                  }
+
                }
             }
             catch (error) {
@@ -118,5 +121,5 @@ bot.on("message", async (ctx) => {
 try {
    bot.start();
 } catch (e) {
-   console.log('Bot not started:', e)
+   console.log('Bot not started, error:', e)
 }
