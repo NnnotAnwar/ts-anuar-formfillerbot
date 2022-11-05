@@ -45,6 +45,9 @@ var bot = new grammy_1.Bot("5540006836:AAHWVOln6dC6p9TMSDey2qI00MBLHAHHg34");
 //ChromeDriver emulator, Chrome options
 var chrome = require('selenium-webdriver/chrome');
 var chromeOptions = new chrome_1.Options().addArguments('--lang=ru');
+chromeOptions.addArguments('--headless');
+chromeOptions.addArguments('--disable-gpu');
+chromeOptions.addArguments('--no-sandbox');
 //Pre-assign menu text
 var firstMenu = "<b>Menu 1</b>\n\nA beautiful menu with a shiny inline button.";
 var secondMenu = "<b>Menu 2</b>\n\nA better menu with even more shiny inline buttons.";
