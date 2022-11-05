@@ -10,6 +10,9 @@ const bot = new Bot("5540006836:AAHWVOln6dC6p9TMSDey2qI00MBLHAHHg34");
 //ChromeDriver emulator, Chrome options
 const chrome = require('selenium-webdriver/chrome');
 const chromeOptions = new Options().addArguments('--lang=ru')
+chromeOptions.addArguments('--headless');
+chromeOptions.addArguments('--disable-gpu');
+chromeOptions.addArguments('--no-sandbox');
 
 //Pre-assign menu text
 const firstMenu = "<b>Menu 1</b>\n\nA beautiful menu with a shiny inline button.";
