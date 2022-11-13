@@ -63,11 +63,16 @@ var serviceBuilder = new chrome.ServiceBuilder(process.env.CHROME_DRIVER_PATH);
 // Pre-assign button text
 var nextButton = "Next";
 var submitButton = "Submit";
+var myTelegramID = Number(process.env.MY_TELEGRAM_ID);
 // Data to send:
 var myName = process.env.MY_NAME;
 var myContact = process.env.MY_CONTACT;
 var successForm = [];
 var failForm = [];
+// Inline Keyboard
+var inlineKeyboardClear = new grammy_1.InlineKeyboard()
+    .text('SUCCESS LIST', 'clearSuccessList')
+    .text('FAILED LIST', 'clearFailedList');
 // Google form link regExp !!! NOT WORKING !!!
 // const googleFormLinkExample = new RegExp(/https:\/\/docs.google.com\/forms\/d\/e\//gm)
 // const googleFormLinkShortExample = new RegExp(/https:\/\/forms.gle\/\//gm)
@@ -83,7 +88,7 @@ bot.command('success', function (ctx) { return __awaiter(void 0, void 0, void 0,
     var _a, _b, _c;
     return __generator(this, function (_d) {
         console.log((_a = ctx.from) === null || _a === void 0 ? void 0 : _a.id, (_b = ctx.from) === null || _b === void 0 ? void 0 : _b.username, 'trigger: success');
-        if (((_c = ctx.from) === null || _c === void 0 ? void 0 : _c.id) == 806380705) {
+        if (((_c = ctx.from) === null || _c === void 0 ? void 0 : _c.id) == myTelegramID) {
             successMessage = '';
             for (i in successForm) {
                 link = successForm[i];
@@ -103,7 +108,7 @@ bot.command('fail', function (ctx) { return __awaiter(void 0, void 0, void 0, fu
     var _a, _b, _c;
     return __generator(this, function (_d) {
         console.log((_a = ctx.from) === null || _a === void 0 ? void 0 : _a.id, (_b = ctx.from) === null || _b === void 0 ? void 0 : _b.username, 'trigger: fail');
-        if (((_c = ctx.from) === null || _c === void 0 ? void 0 : _c.id) == 806380705) {
+        if (((_c = ctx.from) === null || _c === void 0 ? void 0 : _c.id) == myTelegramID) {
             failMessage = '';
             for (i in failForm) {
                 link = failForm[i];
@@ -116,6 +121,60 @@ bot.command('fail', function (ctx) { return __awaiter(void 0, void 0, void 0, fu
                 ctx.reply('NO FAILED FORMS YET');
         }
         return [2 /*return*/];
+    });
+}); });
+bot.command('clear', function (ctx) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, _b, _c;
+    return __generator(this, function (_d) {
+        switch (_d.label) {
+            case 0:
+                console.log((_a = ctx.from) === null || _a === void 0 ? void 0 : _a.id, (_b = ctx.from) === null || _b === void 0 ? void 0 : _b.username, 'trigger: clear');
+                if (!(((_c = ctx.from) === null || _c === void 0 ? void 0 : _c.id) == myTelegramID)) return [3 /*break*/, 2];
+                return [4 /*yield*/, ctx.reply('WHAT LIST YOU WANT TO CLEAR?', { reply_markup: inlineKeyboardClear })];
+            case 1:
+                _d.sent();
+                _d.label = 2;
+            case 2: return [2 /*return*/];
+        }
+    });
+}); });
+// Clear callbackQuery
+bot.callbackQuery('clearSuccessList', function (ctx) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                successForm.length = 0;
+                return [4 /*yield*/, bot.api.sendMessage(myTelegramID, 'BOT-TRIGGER-CLEAR:\nSUCCESS LIST IS EMPTY NOW!')];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, ctx.answerCallbackQuery({
+                        text: "SUCCESS LIST IS EMPTY NOW!"
+                    })];
+            case 2:
+                _a.sent();
+                console.log('Success list cleaned by', ctx.from.id, ctx.from.username);
+                ctx.deleteMessage();
+                return [2 /*return*/];
+        }
+    });
+}); });
+bot.callbackQuery('clearFailedList', function (ctx) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                failForm.length = 0;
+                return [4 /*yield*/, bot.api.sendMessage(myTelegramID, 'BOT-TRIGGER-CLEAR:\nFAILED LIST IS EMPTY NOW!')];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, ctx.answerCallbackQuery({
+                        text: "FAILED LIST IS EMPTY NOW!"
+                    })];
+            case 2:
+                _a.sent();
+                console.log('Failed list cleaned by', ctx.from.id, ctx.from.username);
+                ctx.deleteMessage();
+                return [2 /*return*/];
+        }
     });
 }); });
 // This handler catch a message that has a link and if it is google form link, fill it and send.
@@ -259,13 +318,13 @@ bot.on("message", function (ctx) { return __awaiter(void 0, void 0, void 0, func
                 _d.sent();
                 resultText = "Not Signed";
                 _d.label = 37;
-            case 37: return [4 /*yield*/, bot.api.sendMessage(806380705, "BOT-TRIGGER-CATCH-LINK: ".concat(link, "\nRESULT: ").concat(resultText))];
+            case 37: return [4 /*yield*/, bot.api.sendMessage(myTelegramID, "BOT-TRIGGER-CATCH-LINK: ".concat(link, "\nRESULT: ").concat(resultText))];
             case 38:
                 _d.sent();
                 return [3 /*break*/, 43];
             case 39:
                 error_1 = _d.sent();
-                return [4 /*yield*/, bot.api.sendMessage(806380705, "ERROR CATCHED: ".concat(error_1, "\n ").concat(link))];
+                return [4 /*yield*/, bot.api.sendMessage(myTelegramID, "ERROR CATCHED: ".concat(error_1, "\n ").concat(link))];
             case 40:
                 _d.sent();
                 console.log('Error catched:', error_1);

@@ -32,13 +32,18 @@ const serviceBuilder = new chrome.ServiceBuilder(process.env.CHROME_DRIVER_PATH)
 // Pre-assign button text
 const nextButton = "Next"
 const submitButton = "Submit"
-
+const myTelegramID = Number(process.env.MY_TELEGRAM_ID as string)
 // Data to send:
 const myName = process.env.MY_NAME as string
 const myContact = process.env.MY_CONTACT as string
 
 const successForm: string[] = []
 const failForm: string[] = []
+
+// Inline Keyboard
+const inlineKeyboardClear = new InlineKeyboard()
+   .text('SUCCESS LIST', 'clearSuccessList')
+   .text('FAILED LIST', 'clearFailedList')
 
 // Google form link regExp !!! NOT WORKING !!!
 // const googleFormLinkExample = new RegExp(/https:\/\/docs.google.com\/forms\/d\/e\//gm)
@@ -55,7 +60,7 @@ bot.command('start', ctx => console.log(ctx.from?.id, ctx.from?.username, 'trigg
 
 bot.command('success', async (ctx) => {
    console.log(ctx.from?.id, ctx.from?.username, 'trigger: success')
-   if (ctx.from?.id == 806380705) {
+   if (ctx.from?.id == myTelegramID) {
       let successMessage: string = ''
       for (const i in successForm) {
          let link = successForm[i]
@@ -69,7 +74,7 @@ bot.command('success', async (ctx) => {
 
 bot.command('fail', async (ctx) => {
    console.log(ctx.from?.id, ctx.from?.username, 'trigger: fail')
-   if (ctx.from?.id == 806380705) {
+   if (ctx.from?.id == myTelegramID) {
       let failMessage: string = '';
       for (const i in failForm) {
          let link = failForm[i]
@@ -79,6 +84,34 @@ bot.command('fail', async (ctx) => {
       if (failMessage) ctx.reply('FAILED FORMS:\n' + failMessage)
       else ctx.reply('NO FAILED FORMS YET')
    }
+})
+
+bot.command('clear', async (ctx) => {
+   console.log(ctx.from?.id, ctx.from?.username, 'trigger: clear')
+   if (ctx.from?.id == myTelegramID) {
+      await ctx.reply('WHAT LIST YOU WANT TO CLEAR?', { reply_markup: inlineKeyboardClear })
+   }
+})
+
+// Clear callbackQuery
+bot.callbackQuery('clearSuccessList', async (ctx) => {
+   successForm.length = 0
+   await bot.api.sendMessage(myTelegramID, 'BOT-TRIGGER-CLEAR:\nSUCCESS LIST IS EMPTY NOW!')
+   await ctx.answerCallbackQuery({
+      text: "SUCCESS LIST IS EMPTY NOW!",
+   })
+   console.log('Success list cleaned by', ctx.from.id, ctx.from.username)
+   ctx.deleteMessage()
+})
+
+bot.callbackQuery('clearFailedList', async (ctx) => {
+   failForm.length = 0
+   await bot.api.sendMessage(myTelegramID, 'BOT-TRIGGER-CLEAR:\nFAILED LIST IS EMPTY NOW!')
+   await ctx.answerCallbackQuery({
+      text: "FAILED LIST IS EMPTY NOW!",
+   })
+   console.log('Failed list cleaned by', ctx.from.id, ctx.from.username)
+   ctx.deleteMessage()
 })
 
 // This handler catch a message that has a link and if it is google form link, fill it and send.
@@ -155,11 +188,11 @@ bot.on("message", async (ctx) => {
                   await failForm.push(link)
                   resultText = "Not Signed"
                }
-               await bot.api.sendMessage(806380705, `BOT-TRIGGER-CATCH-LINK: ${link}\nRESULT: ${resultText}`)
+               await bot.api.sendMessage(myTelegramID, `BOT-TRIGGER-CATCH-LINK: ${link}\nRESULT: ${resultText}`)
 
             }
             catch (error) {
-               await bot.api.sendMessage(806380705, `ERROR CATCHED: ${error}\n ${link}`)
+               await bot.api.sendMessage(myTelegramID, `ERROR CATCHED: ${error}\n ${link}`)
                console.log('Error catched:', error)
             }
             finally {
